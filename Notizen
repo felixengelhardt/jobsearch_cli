@@ -1,0 +1,49 @@
+# Monster.de classes die interessant sind:
+# <div class="jobTitle">
+# <div class="company">
+# <div class="job-specs job-specs-location">
+# <a data-m_impr_a_placement_id="JSR2"> <-- URL
+#
+# Query URL
+# https://www.monster.de/jobs/suche/?q={}&where={}&cy=de&rad={}&sort=dt.rv.di
+# Einzutragende Variablen: Jobname,Stadt,Radius
+# &sort=dt.rv.di nach datum sortieren
+# &page=X <- Seite X 
+
+
+
+# Indeed.de classes die interessant sind:
+# <div class="row  result">  <--- Job Title
+# <div class="sjcl"> <--- Firma
+# <span class=location>
+# <a class="jobtitle turnstileLink"> <-- URL
+# Query URL
+# https://de.indeed.com/Jobs?as_and={}&as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&st=&radius={}&l={}&fromage=any&limit={}&sort=&psf=advsrch
+# Einzusetzende Variablen: Jobname,Stadt,Radius,NumberOfResults(Max=50)
+# Seite 2 mit &start=50 in int range 1-50
+# verhält sich komisch
+#
+# &fromage=15 alter der Anzeige 15 tage
+
+
+# Stepstone.de classes die interessant sind:
+# <h2 class="job-element__body__title"> 
+# <div class="job-element__body__company">
+# <li class="job-element__body__location">
+# <a class="job-element__url"> <-- URL
+# Query URL
+# https://www.stepstone.de/5/ergebnisliste.html?stf=freeText&ns=1&qs=%5B%5D&companyID=0&cityID=0&sourceOfTheSearchField=homepagemex%3Ageneral&searchOrigin=Homepage_top-search&ke={}&ws={}&ra={}
+# Einzusetzende Variablen: Jobname,Stadt,Radius
+# valid radius values = 5 10 20 30 40 50 75 100
+# Seite zwei mit &of=25
+# anzahl auf einmal &li=25 Werte = 10 25 50 100
+#
+# sortieren nach datum: &ob=refdate
+
+
+#
+# Die URL für die Jobs müssen noch rausgefiltert werden
+#
+# Funktion die die default sucheinstellungen setzt in ~/.jobsearch_cli
+#
+#
