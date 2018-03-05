@@ -18,15 +18,12 @@ getTags = {
     'monster': [('div', 'jobTitle'), ('div', 'company'), ('div', 'job-specs job-specs-location')],
     'stepstone': [('h2', 'job-element__body__title'),
         ('div', 'job-element__body__company'),
-        ('li', 'job-element__body__location')]} # Stepstone URL ', ('a', 'job-element__url')'
+        ('li', 'job-element__body__location')],
+        'indeed': ['title', 'cmp', 'city', 'jk']} # Stepstone URL ', ('a', 'job-element__url')'
 
 logging.basicConfig( level=logging.WARN) #filename='jobsearch.log',
 
 def getIndeedJobs(bs4Page):
-    title = []
-    company = []
-    city = []
-    url = []
     indeedDict = {
         'title' : [],
         'cmp' : [],
@@ -37,13 +34,12 @@ def getIndeedJobs(bs4Page):
     try:
         indeed = bs4Page.find('script', text=re.compile('jobmap')).text
         indeedJobs = re.findall('jobmap\[.*\].*=.*\{.*\}', indeed)
-        indeedJobs = [ re.sub('\}','',re.sub('jobmap\[.*\].*=.*\{','',job)).split(',') for job in indeedJobs ]
-        #indeedJobs = [ re.sub('\}','',job) for job in indeedJobs ]
-        #indeedJobs = [ job.split(',') for job in indeedJobs ]
+        indeedJobs = [ re.sub('jobmap\[.*\].*=.*\{','',job) for job in indeedJobs ]
+        indeedJobs = [ re.sub('\}','', job) for job in indeedJobs ]
+        indeedJobs = [ job.split(',') for job in indeedJobs ]
         for entry in itertools.chain.from_iterable(indeedJobs):
-            for key in ['title', 'cmp', 'city', 'jk']:
-                if re.match('^{}:'.format(key),entry):
-                    indeedDict[key].append(entry.split(':')[1].strip("'"))
+            if entry.split(':')[0] in getTags['indeed']:
+                 indeedDict[entry.split(':')[0]].append(entry.split(':')[1].strip("'"))
         jobs = [x for x in indeedDict.values()]
         logging.debug(jobs)
         return jobs 
