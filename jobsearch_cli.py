@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 import re
 import os
+import itertools
 import sys
 import logging
 import argparse
@@ -52,11 +53,10 @@ def getJobs(engine, jobname, location, radius):
             indeedJobs = [ re.sub('jobmap\[.*\].*=.*\{','',job) for job in indeedJobs ]
             indeedJobs = [ re.sub('\}','',job) for job in indeedJobs ]
             indeedJobs = [ job.split(',') for job in indeedJobs ]
-            for job in indeedJobs:
-                for entry in job:
-                    for key in ['title', 'cmp', 'city', 'jk']:
-                        if re.match('^{}:'.format(key),entry):
-                            indeedDict[key].append(entry.split(':')[1].strip("'"))
+            for entry in itertools.chain.from_iterable(indeedJobs):
+                for key in ['title', 'cmp', 'city', 'jk']:
+                    if re.match('^{}:'.format(key),entry):
+                        indeedDict[key].append(entry.split(':')[1].strip("'"))
             jobs = [x for x in indeedDict.values()]
             logging.debug(jobs) 
         except AttributeError:
