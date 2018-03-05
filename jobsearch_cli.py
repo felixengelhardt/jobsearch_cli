@@ -1,5 +1,6 @@
 from urllib import request
 from bs4 import BeautifulSoup
+from pathlib import Path
 import numpy as np
 import re
 import os
@@ -18,18 +19,17 @@ getTags = {
         ('div', 'job-element__body__company'),
         ('li', 'job-element__body__location')]} # Stepstone URL ', ('a', 'job-element__url')'
 
-logging.basicConfig(filename='jobsearch.log', level=logging.DEBUG)
+logging.basicConfig( level=logging.WARN) #filename='jobsearch.log',
 
 def getJobs(engine, jobname, location, radius):
     print('Checking for jobs on {}:\n'.format(engine))
-    logging.warning('Input für Funktion getJobs {} {} {} {}'.format(engine, jobname, location, radius))            
-    logging.debug(engineUrls[engine].format(jobname, location, radius))
+    logging.debug('Input für Funktion getJobs {} {} {} {}'.format(engine, jobname, location, radius))            
     page = request.urlopen(engineUrls[engine].format(jobname, location, radius))
     bs4Page = BeautifulSoup(page, 'lxml')
     jobs = []
     if engine == 'stepstone':
         test = bs4Page.find_all('a', class_='job-element__url', href=True)
-        logging.warning([x.get('href') for x in test])
+        logging.debug([x.get('href') for x in test])
     #
     # bs4 gets indeed non-premium job ads as javascript snippet 
     # therefore special treatment is necessary
@@ -39,6 +39,13 @@ def getJobs(engine, jobname, location, radius):
         company = []
         city = []
         url = []
+        indeedDict = {
+            'title' : [],
+            'cmp' : [],
+            'city' : [],
+            'jk' : []
+        }
+        jobs= []
         try:
             indeed = bs4Page.find('script', text=re.compile('jobmap')).text
             indeedJobs = re.findall('jobmap\[.*\].*=.*\{.*\}', indeed)
@@ -47,17 +54,11 @@ def getJobs(engine, jobname, location, radius):
             indeedJobs = [ job.split(',') for job in indeedJobs ]
             for job in indeedJobs:
                 for entry in job:
-                    if entry.startswith('title:'):
-                        title.append(entry.split(':')[1].strip("'"))
-                    elif entry.startswith('cmp:'):
-                        company.append(entry.split(':')[1].strip("'"))
-                    elif entry.startswith('city:'):
-                        city.append(entry.split(':')[1].strip("'"))
-                    elif entry.startswith('jk:'):
-                        url.append('https://de.indeed.com/rc/clk?jk={}'.format(entry.split(':')[1].strip("'")))
-            jobs.append(title)
-            jobs.append(company)
-            jobs.append(city)        
+                    for key in ['title', 'cmp', 'city', 'jk']:
+                        if re.match('^{}:'.format(key),entry):
+                            indeedDict[key].append(entry.split(':')[1].strip("'"))
+            jobs = [x for x in indeedDict.values()]
+            logging.debug(jobs) 
         except AttributeError:
             print('Something went wrong. There are no jobs here.\n')
             pass       
@@ -81,8 +82,9 @@ def main(engines, jobname, location, radius):
 
 
 if __name__ == '__main__':
-    if os.path.isfile('/home/felix/.jobsearch_cli'):
-        f = open('/home/felix/.jobsearch_cli','r')
+    homedir = Path.home()
+    if os.path.isfile('{}/.jobsearch_cli'.format(homedir)):
+        f = open('{}/.jobsearch_cli'.format(homedir),'r')
         jobTitle = f.readline().split('=')[1].strip()
         location = f.readline().split('=')[1].strip()
         radius = f.readline().split('=')[1].strip()
@@ -93,7 +95,7 @@ if __name__ == '__main__':
         title = input('Please enter job title: ')
         location = input('Please enter location: ')
         radius = input('Please enter radius around location which is acceptable: ')
-        f = open('/home/felix/.jobsearch_cli','w')
+        f = open('{}/.jobsearch_cli'.format(homedir),'w')
         f.write('title={}\nlocation={}\nradius={}'.format(title, location, radius))
         f.close()
         sys.exit()
