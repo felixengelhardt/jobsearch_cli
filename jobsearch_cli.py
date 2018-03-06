@@ -2,8 +2,10 @@ from urllib import request
 from bs4 import BeautifulSoup
 from pathlib import Path
 import numpy as np
+import json
 import re
 import os
+import pydoc
 import itertools
 import sys
 import logging
@@ -19,11 +21,14 @@ getTags = {
     'stepstone': [('h2', 'job-element__body__title'),
         ('div', 'job-element__body__company'),
         ('li', 'job-element__body__location')],
-        'indeed': ['title', 'cmp', 'city', 'jk']} # Stepstone URL ', ('a', 'job-element__url')'
+    'indeed': ['title', 'cmp', 'city', 'jk']} # Stepstone URL ', ('a', 'job-element__url')'
 
-logging.basicConfig( level=logging.WARN) #filename='jobsearch.log',
-
+#logging.basicConfig( level=logging.WARN) #filename='jobsearch.log',
 def getIndeedJobs(bs4Page):
+    #
+    # bs4 gets indeed non-premium job ads as javascript snippet
+    # therefore special treatment is necessary
+    #
     indeedDict = {
         'title' : [],
         'cmp' : [],
@@ -42,26 +47,28 @@ def getIndeedJobs(bs4Page):
                  indeedDict[entry.split(':')[0]].append(entry.split(':')[1].strip("'"))
         jobs = [x for x in indeedDict.values()]
         logging.debug(jobs)
-        return jobs 
+        return jobs
     except AttributeError:
         print('Something went wrong. There are no jobs here.\n')
-        pass
+        return None
+
 
 def getJobs(engine, jobname, location, radius):
     print('Checking for jobs on {}:\n'.format(engine))
-    logging.debug('Input für Funktion getJobs {} {} {} {}'.format(engine, jobname, location, radius))            
+    logging.debug('Input für Funktion getJobs {} {} {} {}'.format(engine, jobname, location, radius))
     page = request.urlopen(engineUrls[engine].format(jobname, location, radius))
     bs4Page = BeautifulSoup(page, 'lxml')
     jobs = []
-    if engine == 'stepstone':
-        test = bs4Page.find_all('a', class_='job-element__url', href=True)
-        logging.debug([x.get('href') for x in test])
     #
-    # bs4 gets indeed non-premium job ads as javascript snippet 
-    # therefore special treatment is necessary
+    # Not yet used
     #
+    #if engine == 'stepstone':
+    #    test = bs4Page.find_all('a', class_='job-element__url', href=True)
+    #    logging.debug([x.get('href') for x in test])
     if engine == 'indeed':
         jobs = getIndeedJobs(bs4Page)
+        if jobs is None:
+            jobs = []
     else:
         for entry in getTags[engine]:
             jobs.append([x.get_text().strip() for x in bs4Page.find_all(entry[0],
@@ -69,6 +76,12 @@ def getJobs(engine, jobname, location, radius):
     jobs = np.array(jobs).T.tolist()
     return jobs
 
+def getConfig():
+    f = open(,'r')
+    configFile = f.read()
+    f.close()
+    configJson = json.loads(configFile)
+    return configJson
 
 def main(engines, jobname, location, radius):
     engines = engines.strip().split(',')
@@ -77,8 +90,8 @@ def main(engines, jobname, location, radius):
     jobs = {}
     for engine in engines:
         jobs[engine] = getJobs(engine, jobname, location, radius)
-        for job in jobs[engine][0:9]:
-            print(u'Job Title: {}\nCompany: {}\nLocation: {}\n'.format(job[0], job[1], job[2]))
+ #   logging.warn(jobs)
+    return jobs
 
 
 if __name__ == '__main__':
@@ -89,16 +102,15 @@ if __name__ == '__main__':
         location = f.readline().split('=')[1].strip()
         radius = f.readline().split('=')[1].strip()
         logging.debug('{} {} {}'.format(jobTitle, location, radius))
-        f.close()        
+        f.close()
     else:
         print('No config with defaults found. Please enter your default search queries')
-        title = input('Please enter job title: ')
+        jobTitle = input('Please enter job title: ')
         location = input('Please enter location: ')
         radius = input('Please enter radius around location which is acceptable: ')
         f = open('{}/.jobsearch_cli'.format(homedir),'w')
-        f.write('title={}\nlocation={}\nradius={}'.format(title, location, radius))
+        f.write('title={}\nlocation={}\nradius={}'.format(jobTitle, location, radius))
         f.close()
-        sys.exit()
     parser = argparse.ArgumentParser(description='Jobsearch on the Commandline\
         with Python.')
     parser.add_argument(
@@ -108,10 +120,18 @@ if __name__ == '__main__':
     parser.add_argument(
         '-r', '--radius', help='Search radius around entered location', default='{}'.format(radius))
     parser.add_argument(
-        '-e', '--engine', help='Set the job search engine. Default value is \
-        all, valid values monster, indeed, stepstone, all. Use a comma to \
-        seperate engines',
+        '-e', '--engine', help="""Set the job search engine. Default value is
+        all, valid values monster, indeed, stepstone, all. Use a comma to
+        seperate engines""",
         default='all')
     args = parser.parse_args()
     logging.debug('Suchkriterien: {} {} {} {}'.format(args.engine, args.jobTitle, args.location, args.radius))
-    main(args.engine, args.jobTitle, args.location, args.radius)
+    jobs = main(args.engine, args.jobTitle, args.location, args.radius)
+    engines = jobs.keys()
+    output = ''
+    for engine in engines:
+        output = output + 'The following jobs were found on {}.de\n\n'.format(engine)
+        for job in jobs[engine]:
+            output = output + 'Job Title: {}\nCompany: {}\nLocation: {}\n\n'.format(job[0],job[1],job[2])
+        output = output + '------------------------------------------------\n\n'
+    pydoc.pager(output)
