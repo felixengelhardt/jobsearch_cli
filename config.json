@@ -1,33 +1,15 @@
 {
-  "title" : " Chemiker",
+  "title" : "Chemiker",
   "location" : "Braunschweig",
   "radius" : "30",
-  "engineURL" : [
-    {
-      "name" : "monster",
-      "URL" : "https://www.monster.de/jobs/suche/?q={}&where={}&cy=de&rad={}&sort=dt.rv.di&page=1"
+  "engineURL" : {
+    "monster" : "https://www.monster.de/jobs/suche/?q={}&where={}&cy=de&rad={}&sort=dt.rv.di&page=1",
+    "indeed" : "https://de.indeed.com/Jobs?as_and={}&as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&st=&l={}&radius={}&fromage=&limit=&sort=&psf=advsrch",
+    "stepstone" : "https://www.stepstone.de/5/ergebnisliste.html?stf=freeText&ns=1&qs=%5B%5D&companyID=0&cityID=0&sourceOfTheSearchField=homepagemex%3Ageneral&searchOrigin=Homepage_top-search&ke={}&ws={}&ra={}"
     },
-    {
-      "name" : "indeed",
-      "URL" : "https://de.indeed.com/Jobs?as_and={}&as_phr=&as_any=&as_not=&as_ttl=&as_cmp=&st=&l={}&radius={}&fromage=&limit=&sort=&psf=advsrch"
-    },
-    {
-      "name" : "stepstone",
-      "URL" : "https://www.stepstone.de/5/ergebnisliste.html?stf=freeText&ns=1&qs=%5B%5D&companyID=0&cityID=0&sourceOfTheSearchField=homepagemex%3Ageneral&searchOrigin=Homepage_top-search&ke={}&ws={}&ra={}"
+  "searchTags" : {
+      "monster" : "[('div', 'jobTitle'), ('div', 'company'), ('div', 'job-specs job-specs-location')]",
+      "indeed" : "['title', 'cmp', 'city', 'jk']",
+      "stepstone" : "[('h2', 'job-element__body__title'), ('div', 'job-element__body__company'), ('li', 'job-element__body__location')]"
     }
-  ],
-  "searchTags" : [
-    {
-      "name" : "monster",
-      "tags" : "[('div', 'jobTitle'), ('div', 'company'), ('div', 'job-specs job-specs-location')]"
-    },
-    {
-      "name" : "indeed",
-      "tags": "[('h2', 'job-element__body__title'), ('div', 'job-element__body__company'), ('li', 'job-element__body__location')]"
-    },
-    {
-      "name" : "stepstone",
-      "tags" : "['title', 'cmp', 'city', 'jk']"
-    }
-  ]
 }
