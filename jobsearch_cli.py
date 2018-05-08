@@ -11,7 +11,8 @@ import itertools
 import logging
 import argparse
 
-def getIndeedJobs(bs4Page):
+
+def getIndeedJobs(bs4Page, config):
     #
     # bs4 gets indeed non-premium job ads as javascript snippet
     # therefore special treatment is necessary
@@ -30,7 +31,7 @@ def getIndeedJobs(bs4Page):
         indeedJobs = [ re.sub('\}','', job) for job in indeedJobs ]
         indeedJobs = [ job.split(',') for job in indeedJobs ]
         for entry in itertools.chain.from_iterable(indeedJobs):
-            if entry.split(':')[0] in getTags['indeed']:
+            if entry.split(':')[0] in config['searchTags']['indeed']:
                  indeedDict[entry.split(':')[0]].append(entry.split(':')[1].strip("'"))
         jobs = [x for x in indeedDict.values()]
         logging.debug(jobs)
@@ -42,7 +43,7 @@ def getIndeedJobs(bs4Page):
 
 def getJobs(engine, config, jobname, location, radius):
     print('Checking for jobs on {}:'.format(engine))
-    logging.debug('Input für Funktion getJobs {} {} {} {}'.format(engine, jobname, location, radius))
+    logging.debug('Input for Funktion getJobs {} {} {} {}'.format(engine, jobname, location, radius))
     logging.debug(config['engineURL'][engine].format(jobname, location, radius))
     page = request.urlopen(config['engineURL'][engine].format(jobname, location, radius))
     bs4Page = BeautifulSoup(page, 'lxml')
@@ -54,7 +55,7 @@ def getJobs(engine, config, jobname, location, radius):
     #    test = bs4Page.find_all('a', class_='job-element__url', href=True)
     #    logging.debug([x.get('href') for x in test])
     if engine == 'indeed':
-        jobs = getIndeedJobs(bs4Page)
+        jobs = getIndeedJobs(bs4Page,config)
         if jobs is None:
             jobs = []
     else:
@@ -107,6 +108,10 @@ if __name__ == '__main__':
     for engine in engines:
         output = output + 'The following jobs were found on {}.de\n\n'.format(engine)
         for job in jobs[engine]:
-            output = output + 'Job Title: {}\nCompany: {}\nLocation: {}\n\n'.format(job[0],job[1],job[2])
+            try:
+                output = output + 'Job Title: {}\nCompany: {}\nLocation: {}\nURL: {}\n\n'.format(job[0],job[1],job[2],job[3])
+            except:
+#                logging.warn(jobs[3])
+                output = output + 'Job Title: {}\nCompany: {}\nLocation: {}\n\n'.format(job[0],job[1],job[2])
         output = output + '------------------------------------------------\n\n'
     pydoc.pager(output)
