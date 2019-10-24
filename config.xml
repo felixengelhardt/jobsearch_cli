@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<jobsearch>
+    <engines>
+        <engine name = "monster" query = "?q=" location = "where=" radius = "rad=">https://www.monster.de/jobs/suche/</engine>
+        <engine name = "indeed" query = "?as_and=" location = "l=" radius = "radius=">https://de.indeed.com/Jobs</engine>
+        <engine name = "stepstone" query = "?ke=" location = "ws=" radius = "ra=">https://www.stepstone.de/5/ergebnisliste.html</engine>
+    </engines>
+    <searchterms>
+        <searchterm name = "jobtitle">Chemie</searchterm>
+        <searchterm name = "location">Braunschweig</searchterm>
+        <searchterm name = "radius">20</searchterm>
+    </searchterms>
+</jobsearch>

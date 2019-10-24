@@ -47,3 +47,7 @@
 # Funktion die die default sucheinstellungen setzt in ~/.jobsearch_cli
 #
 #
+
+https://www.monster.de/jobs/suche/?q={}&amp;where={}&amp;cy=de&amp;rad={}&amp;sort=dt.rv.di&amp;page=1
+https://de.indeed.com/Jobs?as_and={}&amp;as_phr=&amp;as_any=&amp;as_not=&amp;as_ttl=&amp;as_cmp=&amp;st=&amp;l={}&amp;radius={}&amp;fromage=&amp;limit=&amp;sort=&amp;psf=advsrch
+https://www.stepstone.de/5/ergebnisliste.html?stf=freeText&amp;ns=1&amp;qs=%5B%5D&amp;companyID=0&amp;cityID=0&amp;sourceOfTheSearchField=homepagemex%3Ageneral&amp;searchOrigin=Homepage_top-search&amp;ke={}&amp;ws={}&amp;ra={}
